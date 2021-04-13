@@ -3,6 +3,7 @@ import { GraphQLUpload } from "graphql-upload";
 import GraphQLJSON from "graphql-type-json";
 import { createUser, findUser, validatePassword } from "../lib/user";
 import { getGifList, getGif, createGif, editGif, deleteGif } from "../lib/gifs";
+import { getTagList, getTag, createTag, editTag, deleteTag } from "../lib/tags";
 import { setLoginSession, getLoginSession } from "../lib/auth";
 import { uploadImage } from "../lib/file";
 import { removeTokenCookie } from "../lib/auth-cookies.js";
@@ -38,11 +39,31 @@ export const resolvers = {
     },
     async gif(_parent, args, _context, _info) {
       try {
-        const result = await getGif(args.id, db);
+        const result = await getGif(args.gif_id, db);
 
         return { result };
       } catch (error) {
         throw new Error(`Error: gif could not be retrieved. Details: ${error}`);
+      }
+    },
+    async tags(_parent, _args, _context, _info) {
+      try {
+        const result = await getTagList(db);
+
+        return result;
+      } catch (error) {
+        throw new Error(
+          `Error: tags could not be retrieved. Details: ${error}`
+        );
+      }
+    },
+    async tag(_parent, args, _context, _info) {
+      try {
+        const result = await getTag(args.tag_id, db);
+
+        return { result };
+      } catch (error) {
+        throw new Error(`Error: tag could not be retrieved. Details: ${error}`);
       }
     },
   },
@@ -56,7 +77,7 @@ export const resolvers = {
 
       if (user && (await validatePassword(user, args.input.password))) {
         const session = {
-          id: user.id,
+          user_id: user.user_id,
           email: user.email,
         };
 
@@ -85,6 +106,18 @@ export const resolvers = {
     },
     async removeGif(_parent, args, _context, _info) {
       const response = await deleteGif(args.input, db);
+      return response;
+    },
+    async addTag(_parent, args, _context, _info) {
+      const tag = await createTag(args.input, db);
+      return { tag };
+    },
+    async editTag(_parent, args, _context, _info) {
+      const tag = await editTag(args.input, db);
+      return { tag };
+    },
+    async removeTag(_parent, args, _context, _info) {
+      const response = await deleteTag(args.input, db);
       return response;
     },
   },

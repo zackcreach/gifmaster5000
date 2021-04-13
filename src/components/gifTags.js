@@ -1,12 +1,18 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FormClose } from "grommet-icons";
 import { Box, Button, Keyboard, Text, TextInput } from "grommet";
 
-const allSuggestions = ["sony", "sonar", "foo", "bar"];
-
 export default function GifTags(props) {
-  const [selectedTags, setSelectedTags] = useState(props.defaultValue.tags);
-  const [suggestions, setSuggestions] = useState(allSuggestions);
+  const [selectedTags, setSelectedTags] = useState(
+    _getFormattedSuggestions(props.defaultValue.tags)
+  );
+  const [suggestions, setSuggestions] = useState(
+    _getFormattedSuggestions(props.availableTags)
+  );
+
+  useEffect(() => {
+    props.handleChange({ ...props.value, tags: selectedTags });
+  }, [selectedTags]);
 
   const onRemoveTag = (tag) => {
     const removeIndex = selectedTags.indexOf(tag);
@@ -21,9 +27,9 @@ export default function GifTags(props) {
 
   const onFilterSuggestion = (value) =>
     setSuggestions(
-      allSuggestions.filter(
+      _getFormattedSuggestions(props.availableTags).filter(
         (suggestion) =>
-          suggestion.toLowerCase().indexOf(value.toLowerCase()) >= 0
+          suggestion.label.toLowerCase().indexOf(value.toLowerCase()) >= 0
       )
     );
 
@@ -88,13 +94,9 @@ const TagInput = ({ value = [], onAdd, onChange, onRemove, ...rest }) => {
   };
 
   const renderValue = () =>
-    value.map((v, index) => (
-      <Tag
-        margin="xxsmall"
-        key={`${v}${index + 0}`}
-        onRemove={() => onRemove(v)}
-      >
-        {v}
+    value.map((node) => (
+      <Tag margin="xxsmall" key={node.value} onRemove={() => onRemove(node)}>
+        {node.label || node}
       </Tag>
     ));
 
@@ -123,3 +125,10 @@ const TagInput = ({ value = [], onAdd, onChange, onRemove, ...rest }) => {
     </Keyboard>
   );
 };
+
+function _getFormattedSuggestions(tags) {
+  return tags.map((tag) => ({
+    label: tag.tag_name,
+    value: tag.tag_id,
+  }));
+}

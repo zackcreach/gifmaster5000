@@ -53,7 +53,7 @@ export default function Home(props) {
   }
 
   async function handleClickDelete(event) {
-    const id = event.target.id;
+    const gif_id = event.target.id;
     const filename = event.target.dataset?.filename;
 
     try {
@@ -62,7 +62,7 @@ export default function Home(props) {
 
       // Delete record from db
       const response = await removeGif({
-        variables: { id },
+        variables: { gif_id },
       });
 
       const success = response?.data?.removeGif?.success;
@@ -90,7 +90,7 @@ export default function Home(props) {
           <Grid columns={size !== "small" ? "small" : "100%"} gap="small">
             {gifs.map((gif) => (
               <GifCard
-                key={gif.name}
+                key={gif.gif_name}
                 handleClickDelete={handleClickDelete}
                 setItem={setItem}
                 {...gif}
@@ -106,6 +106,7 @@ export default function Home(props) {
             modal
           >
             <GifForm
+              availableTags={props.tags}
               handleClickLayer={handleClickLayer}
               refreshGifs={refreshGifs}
               item={item}
@@ -117,20 +118,34 @@ export default function Home(props) {
   );
 }
 
+const TagsQuery = gql`
+  query TagsQuery {
+    tags {
+      tag_id
+      tag_name
+    }
+  }
+`;
+
 const GifsQuery = gql`
   query GifsQuery {
     gifs {
-      id
+      gif_id
+      gif_name
       file
-      name
-      tags
+      tags {
+        tag_id
+        tag_name
+        created_ts
+        updated_ts
+      }
     }
   }
 `;
 
 const RemoveGifMutation = gql`
-  mutation RemoveGifMutation($id: String!) {
-    removeGif(input: { id: $id }) {
+  mutation RemoveGifMutation($gif_id: ID!) {
+    removeGif(input: { gif_id: $gif_id }) {
       success
     }
   }
@@ -139,14 +154,14 @@ const RemoveGifMutation = gql`
 export async function getServerSideProps() {
   const apolloClient = initializeApollo();
 
-  const props = { gifs: [] };
+  const props = { gifs: [], tags: [] };
 
   try {
-    const response = await apolloClient.query({
-      query: GifsQuery,
-    });
+    const gifsResponse = await apolloClient.query({ query: GifsQuery });
+    props.gifs = gifsResponse?.data?.gifs || [];
 
-    props.gifs = response?.data?.gifs || [];
+    const tagsResponse = await apolloClient.query({ query: TagsQuery });
+    props.tags = tagsResponse?.data?.tags || [];
   } catch (error) {
     props.error = JSON.stringify(error);
   } finally {

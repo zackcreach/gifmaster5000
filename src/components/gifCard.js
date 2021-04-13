@@ -6,19 +6,19 @@ import styles from "./gifCard.module.css";
 export default function GifCard(props) {
   function handleClickEdit(event) {
     props.setItem({
-      id: props.id,
+      gif_id: props.gif_id,
+      gif_name: props.gif_name,
       file: props.file,
-      name: props.name,
       tags: props.tags,
     });
   }
 
   return (
-    <Box key={props.id} style={{ position: "relative" }}>
+    <Box key={props.gif_id} style={{ position: "relative" }}>
       <div
         className={styles.closeContainer}
         onClick={props.handleClickDelete}
-        id={props.id}
+        id={props.gif_id}
         data-filename={props.file?.filename}
       >
         <Close size="small" color="white" />

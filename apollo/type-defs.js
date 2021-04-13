@@ -5,7 +5,7 @@ export const typeDefs = gql`
   scalar JSON
 
   type User {
-    id: ID!
+    user_id: ID!
     email: String!
     created_ts: String!
     hash: String!
@@ -17,17 +17,18 @@ export const typeDefs = gql`
     encoding: String!
   }
   type Gif {
-    id: ID!
+    gif_id: ID!
+    gif_name: String!
     file: JSON!
-    name: String!
-    tags: [String]
+    tags: [Tag]
     created_ts: String!
     updated_ts: String!
   }
   type Tag {
-    id: ID!
-    name: String!
+    tag_id: ID!
+    tag_name: String!
     created_ts: String!
+    updated_ts: String!
   }
 
   input SignUpInput {
@@ -39,45 +40,66 @@ export const typeDefs = gql`
     password: String!
   }
   input AddGifInput {
+    gif_name: String!
     file: JSON!
-    name: String!
     tags: [String]
   }
   input EditGifInput {
-    id: ID!
+    gif_id: ID!
+    gif_name: String!
     file: JSON!
-    name: String!
     tags: [String]
   }
   input RemoveGifInput {
-    id: String!
+    gif_id: ID!
+  }
+  input AddTagInput {
+    tag_name: String!
+  }
+  input EditTagInput {
+    tag_id: ID!
+    tag_name: String!
+  }
+  input RemoveTagInput {
+    tag_id: ID!
   }
 
   type SignUpPayload {
-    user: User!
+    user: User
   }
   type SignInPayload {
-    user: User!
+    user: User
   }
   type AddFilePayload {
-    file: File!
+    file: File
   }
   type AddGifPayload {
-    gif: Gif!
+    gif: Gif
   }
   type EditGifPayload {
-    gif: Gif!
+    gif: Gif
   }
   type RemoveGifPayload {
-    success: Boolean!
+    gif: Gif
+  }
+  type AddTagPayload {
+    tag: Tag
+  }
+  type EditTagPayload {
+    tag: Tag
+  }
+  type RemoveTagPayload {
+    tag: Tag
   }
 
   type Query {
-    user(id: ID!): User!
+    user(user_id: ID!): User!
     users: [User]!
     viewer: User
     gifs: [Gif]
-    gif(id: ID!): Gif!
+    gif(gif_id: ID!): Gif!
+    tags: [Tag]
+    tag(tag_id: ID!): Tag!
   }
 
   type Mutation {
@@ -88,5 +110,8 @@ export const typeDefs = gql`
     addGif(input: AddGifInput!): AddGifPayload!
     editGif(input: EditGifInput!): EditGifPayload!
     removeGif(input: RemoveGifInput!): RemoveGifPayload!
+    addTag(input: AddTagInput!): AddTagPayload!
+    editTag(input: EditTagInput!): EditTagPayload!
+    removeTag(input: RemoveTagInput!): RemoveTagPayload!
   }
 `;

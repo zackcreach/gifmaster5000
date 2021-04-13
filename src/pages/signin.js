@@ -10,7 +10,7 @@ const SignInMutation = gql`
   mutation SignInMutation($email: String!, $password: String!) {
     signIn(input: { email: $email, password: $password }) {
       user {
-        id
+        user_id
         email
       }
     }

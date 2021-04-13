@@ -17,10 +17,12 @@ import {
 import GifTags from "./gifTags";
 
 export default function GifForm(props) {
+  const title = props.item ? "Edit Gif" : "Upload Gif";
+
   const defaultValue = {
-    id: props.item?.id || null,
+    gif_id: props.item?.gif_id || null,
+    gif_name: props.item?.gif_name || null,
     file: props.item?.file || {},
-    name: props.item?.name || "",
     tags: props.item?.tags || [],
   };
 
@@ -31,6 +33,7 @@ export default function GifForm(props) {
   const [value, setValue] = useState(defaultValue);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [addTag] = useMutation(AddTagMutation);
   const [addGif] = useMutation(AddGifMutation);
   const [editGif] = useMutation(EditGifMutation);
 
@@ -50,7 +53,7 @@ export default function GifForm(props) {
       setLocalImageUrl(event.target.result);
       handleChange({
         ...value,
-        name: value.name || upload.name.replace(/\.\w+/, ""),
+        gif_name: value.gif_name || upload.name.replace(/\.\w+/, ""),
       });
     };
   }
@@ -64,9 +67,8 @@ export default function GifForm(props) {
       const formData = new FormData();
       formData.append("file", upload);
 
-      let imageData = defaultValue.file;
-
       // Upload image
+      let imageData = defaultValue.file;
       if (upload != null) {
         const response = await fetch("/api/image/upload", {
           method: "POST",
@@ -77,18 +79,40 @@ export default function GifForm(props) {
         imageData = data;
       }
 
+      // Post any new tags
+      const modifiedTags = [];
+      for (const tag of value.tags) {
+        if (typeof tag === "string") {
+          const tagResponse = await addTag({
+            variables: {
+              tag_name: tag,
+            },
+          });
+
+          const tag_id = tagResponse?.data?.addTag?.tag?.tag_id || null;
+
+          modifiedTags.push(tag_id);
+        } else {
+          modifiedTags.push(tag.value);
+        }
+      }
+
+      console.log(value.tags);
+
       const variables = {
         file: imageData || {},
-        name: value.name,
-        tags: value.tags,
+        gif_name: value.gif_name,
+        tags: modifiedTags,
       };
 
-      if (defaultValue.id != null) {
+      if (defaultValue.gif_id != null) {
+        variables.gif_id = value.gif_id;
         await editGif({ variables });
       } else {
-        variables.id = value.id;
         await addGif({ variables });
       }
+
+      props.refreshGifs();
     } catch (error) {
       setError({ message: getErrorMessage(error) });
     } finally {
@@ -105,10 +129,16 @@ export default function GifForm(props) {
     setValue(nextValue);
   }
 
+  function handleKeyDown(event) {
+    if ((event.charCode || event.keyCode) === 13) {
+      event.preventDefault();
+    }
+  }
+
   return (
     <Box pad="large" gap="medium" width="medium">
       <Box direction="row" justify="between">
-        <Heading level="3">Upload New Gif</Heading>
+        <Heading level="3">{title}</Heading>
         {isLoading && <Spinner />}
       </Box>
 
@@ -117,6 +147,7 @@ export default function GifForm(props) {
         onSubmit={handleSubmit}
         onChange={handleChange}
         onReset={handleReset}
+        onKeyDown={handleKeyDown}
       >
         <Box pad={localImageUrl && { bottom: "medium" }}>
           <Image src={localImageUrl} />
@@ -125,7 +156,7 @@ export default function GifForm(props) {
         <Box pad={{ bottom: "medium" }}>
           <FileInput
             accept=".gif"
-            required={!props.item?.id}
+            required={!props.item?.gif_id}
             onChange={handleChangeFile}
             disabled={isLoading}
             renderFile={(file) => (
@@ -137,25 +168,28 @@ export default function GifForm(props) {
           />
         </Box>
 
-        <FormField name="name" htmlFor="name-input-id" label="Name">
-          <TextInput htmlFor="name-input-id" name="name" required />
+        <FormField name="gif_name" htmlFor="name-input-id" label="Name">
+          <TextInput htmlFor="name-input-id" name="gif_name" required />
         </FormField>
 
         <Box pad={{ bottom: "large" }}>
           <FormField name="tags" htmlFor="tags-input-id" label="Tags">
-            <GifTags defaultValue={defaultValue} />
+            <GifTags
+              defaultValue={defaultValue}
+              availableTags={props.availableTags}
+              value={value}
+              handleChange={handleChange}
+            />
           </FormField>
         </Box>
 
-        {error.message && (
-          <Box pad={{ bottom: "medium", top: "medium" }}>
-            <Text color="status-error">{error.message}</Text>
-          </Box>
-        )}
-
         {isSubmitted && (
-          <Box pad={{ bottom: "medium", top: "medium" }}>
-            <Text color="status-ok">Success!</Text>
+          <Box pad={{ bottom: "medium" }}>
+            {error.message == null ? (
+              <Text color="status-ok">Success!</Text>
+            ) : (
+              <Text color="status-error">{error.message}</Text>
+            )}
           </Box>
         )}
 
@@ -169,16 +203,21 @@ export default function GifForm(props) {
   );
 }
 
+const AddTagMutation = gql`
+  mutation AddTagMutation($tag_name: String!) {
+    addTag(input: { tag_name: $tag_name }) {
+      tag {
+        tag_id
+      }
+    }
+  }
+`;
+
 const AddGifMutation = gql`
-  mutation AddGifMutation($file: JSON!, $name: String!, $tags: [String]) {
-    addGif(input: { file: $file, name: $name, tags: $tags }) {
+  mutation AddGifMutation($file: JSON!, $gif_name: String!, $tags: [String]) {
+    addGif(input: { file: $file, gif_name: $gif_name, tags: $tags }) {
       gif {
-        id
-        file
-        name
-        tags
-        created_ts
-        updated_ts
+        gif_id
       }
     }
   }
@@ -186,19 +225,16 @@ const AddGifMutation = gql`
 
 const EditGifMutation = gql`
   mutation EditGifMutation(
+    $gif_id: ID!
+    $gif_name: String!
     $file: JSON!
-    $name: String!
     $tags: [String]
-    $id: ID!
   ) {
-    editGif(input: { file: $file, name: $name, tags: $tags, id: $id }) {
+    editGif(
+      input: { gif_id: $gif_id, gif_name: $gif_name, file: $file, tags: $tags }
+    ) {
       gif {
-        id
-        file
-        name
-        tags
-        created_ts
-        updated_ts
+        gif_id
       }
     }
   }
