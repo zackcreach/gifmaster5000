@@ -1,15 +1,19 @@
 import { AuthenticationError, UserInputError } from "apollo-server-micro";
-import { GraphQLUpload } from "graphql-upload";
 import GraphQLJSON from "graphql-type-json";
 import { createUser, findUser, validatePassword } from "../lib/user";
-import { getGifList, getGif, createGif, editGif, deleteGif } from "../lib/gifs";
+import {
+  getGifList,
+  getGif,
+  createGif,
+  editGif,
+  deleteGif,
+  searchGifList,
+} from "../lib/gifs";
 import { getTagList, getTag, createTag, editTag, deleteTag } from "../lib/tags";
 import { setLoginSession, getLoginSession } from "../lib/auth";
-import { uploadImage } from "../lib/file";
 import { removeTokenCookie } from "../lib/auth-cookies.js";
 
 export const resolvers = {
-  FileUpload: GraphQLUpload,
   JSON: GraphQLJSON,
   Query: {
     async viewer(_parent, _args, context, _info) {
@@ -25,9 +29,10 @@ export const resolvers = {
         );
       }
     },
-    async gifs(_parent, _args, _context, _info) {
+    async gifs(_parent, args, _context, _info) {
+      console.log({ args });
       try {
-        const result = await getGifList();
+        const result = await getGifList(args.input);
 
         return result;
       } catch (error) {
@@ -38,7 +43,7 @@ export const resolvers = {
     },
     async gif(_parent, args, _context, _info) {
       try {
-        const result = await getGif(args.gif_id);
+        const result = await getGif(args.input);
 
         return { result };
       } catch (error) {
@@ -58,7 +63,7 @@ export const resolvers = {
     },
     async tag(_parent, args, _context, _info) {
       try {
-        const result = await getTag(args.tag_id);
+        const result = await getTag(args.input);
 
         return { result };
       } catch (error) {
@@ -90,10 +95,6 @@ export const resolvers = {
     async signOut(_parent, _args, context, _info) {
       removeTokenCookie(context.res);
       return true;
-    },
-    async uploadFile(_parent, args, _context, _info) {
-      const file = await uploadImage(args.file);
-      return { file };
     },
     async addGif(_parent, args, _context, _info) {
       const gif = await createGif(args.input);

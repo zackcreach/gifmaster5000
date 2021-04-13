@@ -48,6 +48,11 @@ export default function GifForm(props) {
 
   async function handleChangeFile(event) {
     const upload = event.target.files[0];
+
+    if (upload == null) {
+      return;
+    }
+
     setUpload(upload);
 
     const reader = new FileReader();
@@ -150,7 +155,7 @@ export default function GifForm(props) {
   }
 
   return (
-    <Box pad="large" gap="medium" width="medium">
+    <Box pad="large" gap="medium" width="medium" background="dark-1">
       <Box direction="row" justify="between" align="center">
         <Heading level="3">{title}</Heading>
         {renderStatus()}

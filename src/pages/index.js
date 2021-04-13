@@ -2,12 +2,13 @@ import Head from "next/head";
 import { useState, useContext, useEffect } from "react";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { initializeApollo } from "../../apollo/client";
-import { Main, Layer, Text, Grid, Box, ResponsiveContext } from "grommet";
+import { Main, Layer, Text, Grid, Box } from "grommet";
 import { getErrorMessage } from "../../utils/form";
 
 import Header from "../components/header";
 import GifForm from "../components/gifForm";
 import GifCard from "../components/gifCard";
+import GifSearch from "../components/gifSearch";
 
 export default function Home(props) {
   const [refreshGifs, refreshGifsResponse] = useLazyQuery(GifsQuery, {
@@ -16,7 +17,6 @@ export default function Home(props) {
 
   const [removeGif] = useMutation(RemoveGifMutation);
 
-  const size = useContext(ResponsiveContext);
   const [item, setItem] = useState(null);
   const [gifs, setGifs] = useState(props.gifs);
   const [error, setError] = useState({});
@@ -82,22 +82,26 @@ export default function Home(props) {
 
       <Main background="dark-1" style={{ minHeight: "100vh" }}>
         <Header toggleModal={toggleModal} />
-        {error.message && <Text color="status-error">{error.message}</Text>}
 
-        <Grid
-          columns={size !== "small" ? "small" : "100%"}
-          gap="small"
+        <Box
           pad="large"
+          pad={{ top: "medium", horizontal: "large", bottom: "large" }}
         >
-          {gifs.map((gif) => (
-            <GifCard
-              key={gif.gif_name}
-              handleClickDelete={handleClickDelete}
-              setItem={setItem}
-              {...gif}
-            />
-          ))}
-        </Grid>
+          <GifSearch refreshGifs={refreshGifs} />
+
+          {error.message && <Text color="status-error">{error.message}</Text>}
+
+          <Grid columns="small" gap="small">
+            {gifs.map((gif) => (
+              <GifCard
+                key={gif.gif_name}
+                handleClickDelete={handleClickDelete}
+                setItem={setItem}
+                {...gif}
+              />
+            ))}
+          </Grid>
+        </Box>
 
         {isModalOpen && (
           <Layer onClickOutside={toggleModal} onEsc={toggleModal} modal>
@@ -124,8 +128,8 @@ const TagsQuery = gql`
 `;
 
 const GifsQuery = gql`
-  query GifsQuery {
-    gifs {
+  query GifsQuery($search: String) {
+    gifs(input: { search: $search }) {
       gif_id
       gif_name
       file

@@ -6,7 +6,7 @@ import {
   Menu,
   Text,
 } from "grommet";
-import { Grommet as GrommetIcon, Menu as MenuIcon } from "grommet-icons";
+import { Menu as MenuIcon } from "grommet-icons";
 
 export default function Header(props) {
   return (
@@ -14,10 +14,12 @@ export default function Header(props) {
       background="dark-2"
       pad="large"
       height="xsmall"
-      border={{ color: "brand", side: "top", size: "small" }}
+      border={{ color: "brand", side: "top", size: "medium" }}
     >
       <Anchor href="/">
-        <Text size="xxlarge">Gif Master 5000</Text>
+        <Text size="xxlarge" weight={500}>
+          Gif Master 5000
+        </Text>
       </Anchor>
 
       <ResponsiveContext.Consumer>

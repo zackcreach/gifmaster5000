@@ -1,20 +1,17 @@
 import { gql } from "@apollo/client";
 
 export const typeDefs = gql`
-  scalar FileUpload
   scalar JSON
 
+  #
+  # Types
+  #
   type User {
     user_id: ID!
     email: String!
     created_ts: String!
     hash: String!
     salt: String!
-  }
-  type File {
-    filename: String!
-    mimetype: String!
-    encoding: String!
   }
   type Gif {
     gif_id: ID!
@@ -31,6 +28,12 @@ export const typeDefs = gql`
     updated_ts: String!
   }
 
+  #
+  # Inputs
+  #
+  input GetUserInput {
+    user_id: String!
+  }
   input SignUpInput {
     email: String!
     password: String!
@@ -38,6 +41,14 @@ export const typeDefs = gql`
   input SignInInput {
     email: String!
     password: String!
+  }
+  input GetGifsInput {
+    search: String
+  }
+  input GetGifInput {
+    gif_name: String!
+    file: JSON!
+    tags: [String]
   }
   input AddGifInput {
     gif_name: String!
@@ -53,6 +64,9 @@ export const typeDefs = gql`
   input RemoveGifInput {
     gif_id: ID!
   }
+  input GetTagInput {
+    tag_id: String!
+  }
   input AddTagInput {
     tag_name: String!
   }
@@ -64,14 +78,14 @@ export const typeDefs = gql`
     tag_id: ID!
   }
 
+  #
+  # Payloads
+  #
   type SignUpPayload {
     user: User
   }
   type SignInPayload {
     user: User
-  }
-  type AddFilePayload {
-    file: File
   }
   type AddGifPayload {
     gif: Gif
@@ -92,21 +106,26 @@ export const typeDefs = gql`
     tag: Tag
   }
 
+  #
+  # Query
+  #
   type Query {
-    user(user_id: ID!): User!
+    user(input: GetUserInput!): User!
     users: [User]!
     viewer: User
-    gifs: [Gif]
-    gif(gif_id: ID!): Gif!
+    gifs(input: GetGifsInput): [Gif]
+    gif(input: GetGifInput!): Gif!
     tags: [Tag]
-    tag(tag_id: ID!): Tag!
+    tag(input: GetTagInput!): Tag!
   }
 
+  #
+  # Mutation
+  #
   type Mutation {
     signUp(input: SignUpInput!): SignUpPayload!
     signIn(input: SignInInput!): SignInPayload!
     signOut: Boolean!
-    uploadFile(file: FileUpload!): File!
     addGif(input: AddGifInput!): AddGifPayload!
     editGif(input: EditGifInput!): EditGifPayload!
     removeGif(input: RemoveGifInput!): RemoveGifPayload!

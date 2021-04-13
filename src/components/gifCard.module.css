@@ -1,16 +1,12 @@
+.header {
+  position: relative;
+}
+
 .closeContainer {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 1;
   cursor: pointer;
 }
 
 .editContainer {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1;
   cursor: pointer;
 }
 
