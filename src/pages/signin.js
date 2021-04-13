@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { gql } from "@apollo/client";
 import { useMutation, useApolloClient } from "@apollo/client";
-import { getErrorMessage } from "../../lib/form";
+import { getErrorMessage } from "../../utils/form";
 import Field from "../components/field";
 
 const SignInMutation = gql`
