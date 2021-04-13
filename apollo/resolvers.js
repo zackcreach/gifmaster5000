@@ -7,7 +7,6 @@ import { getTagList, getTag, createTag, editTag, deleteTag } from "../lib/tags";
 import { setLoginSession, getLoginSession } from "../lib/auth";
 import { uploadImage } from "../lib/file";
 import { removeTokenCookie } from "../lib/auth-cookies.js";
-import db from "../lib/database";
 
 export const resolvers = {
   FileUpload: GraphQLUpload,
@@ -18,7 +17,7 @@ export const resolvers = {
         const session = await getLoginSession(context.req);
 
         if (session) {
-          return findUser({ email: session.email }, db);
+          return findUser({ email: session.email });
         }
       } catch (error) {
         throw new AuthenticationError(
@@ -28,7 +27,7 @@ export const resolvers = {
     },
     async gifs(_parent, _args, _context, _info) {
       try {
-        const result = await getGifList(db);
+        const result = await getGifList();
 
         return result;
       } catch (error) {
@@ -39,7 +38,7 @@ export const resolvers = {
     },
     async gif(_parent, args, _context, _info) {
       try {
-        const result = await getGif(args.gif_id, db);
+        const result = await getGif(args.gif_id);
 
         return { result };
       } catch (error) {
@@ -48,7 +47,7 @@ export const resolvers = {
     },
     async tags(_parent, _args, _context, _info) {
       try {
-        const result = await getTagList(db);
+        const result = await getTagList();
 
         return result;
       } catch (error) {
@@ -59,7 +58,7 @@ export const resolvers = {
     },
     async tag(_parent, args, _context, _info) {
       try {
-        const result = await getTag(args.tag_id, db);
+        const result = await getTag(args.tag_id);
 
         return { result };
       } catch (error) {
@@ -69,11 +68,11 @@ export const resolvers = {
   },
   Mutation: {
     async signUp(_parent, args, _context, _info) {
-      const user = await createUser(args.input, db);
+      const user = await createUser(args.input);
       return { user };
     },
     async signIn(_parent, args, context, _info) {
-      const user = await findUser({ email: args.input.email }, db);
+      const user = await findUser({ email: args.input.email });
 
       if (user && (await validatePassword(user, args.input.password))) {
         const session = {
@@ -97,28 +96,28 @@ export const resolvers = {
       return { file };
     },
     async addGif(_parent, args, _context, _info) {
-      const gif = await createGif(args.input, db);
+      const gif = await createGif(args.input);
       return { gif };
     },
     async editGif(_parent, args, _context, _info) {
-      const gif = await editGif(args.input, db);
+      const gif = await editGif(args.input);
       return { gif };
     },
     async removeGif(_parent, args, _context, _info) {
-      const response = await deleteGif(args.input, db);
-      return response;
+      const gif = await deleteGif(args.input);
+      return { gif };
     },
     async addTag(_parent, args, _context, _info) {
-      const tag = await createTag(args.input, db);
+      const tag = await createTag(args.input);
       return { tag };
     },
     async editTag(_parent, args, _context, _info) {
-      const tag = await editTag(args.input, db);
+      const tag = await editTag(args.input);
       return { tag };
     },
     async removeTag(_parent, args, _context, _info) {
-      const response = await deleteTag(args.input, db);
-      return response;
+      const tag = await deleteTag(args.input);
+      return { tag };
     },
   },
 };

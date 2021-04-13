@@ -2,8 +2,8 @@ import Head from "next/head";
 import { useState, useContext, useEffect } from "react";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { initializeApollo } from "../../apollo/client";
-import { Layer, Text, Grid, Box, ResponsiveContext } from "grommet";
-import { getErrorMessage } from "../../lib/form";
+import { Main, Layer, Text, Grid, Box, ResponsiveContext } from "grommet";
+import { getErrorMessage } from "../../utils/form";
 
 import Header from "../components/header";
 import GifForm from "../components/gifForm";
@@ -38,7 +38,7 @@ export default function Home(props) {
 
   useEffect(() => {
     if (item != null) {
-      handleClickLayer();
+      toggleModal();
     }
   }, [item]);
 
@@ -48,7 +48,7 @@ export default function Home(props) {
     }
   }, [isModalOpen]);
 
-  function handleClickLayer() {
+  function toggleModal() {
     setIsModalOpen((prevState) => !prevState);
   }
 
@@ -65,8 +65,7 @@ export default function Home(props) {
         variables: { gif_id },
       });
 
-      const success = response?.data?.removeGif?.success;
-      if (success === true) {
+      if (response?.data?.removeGif?.gif?.gif_id != null) {
         refreshGifs();
       }
     } catch (error) {
@@ -81,39 +80,36 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Header handleClickLayer={handleClickLayer} />
-
-      <main>
+      <Main background="dark-1" style={{ minHeight: "100vh" }}>
+        <Header toggleModal={toggleModal} />
         {error.message && <Text color="status-error">{error.message}</Text>}
 
-        <Box pad="large" background="light-2">
-          <Grid columns={size !== "small" ? "small" : "100%"} gap="small">
-            {gifs.map((gif) => (
-              <GifCard
-                key={gif.gif_name}
-                handleClickDelete={handleClickDelete}
-                setItem={setItem}
-                {...gif}
-              />
-            ))}
-          </Grid>
-        </Box>
+        <Grid
+          columns={size !== "small" ? "small" : "100%"}
+          gap="small"
+          pad="large"
+        >
+          {gifs.map((gif) => (
+            <GifCard
+              key={gif.gif_name}
+              handleClickDelete={handleClickDelete}
+              setItem={setItem}
+              {...gif}
+            />
+          ))}
+        </Grid>
 
         {isModalOpen && (
-          <Layer
-            onClickOutside={handleClickLayer}
-            onEsc={handleClickLayer}
-            modal
-          >
+          <Layer onClickOutside={toggleModal} onEsc={toggleModal} modal>
             <GifForm
               availableTags={props.tags}
-              handleClickLayer={handleClickLayer}
+              toggleModal={toggleModal}
               refreshGifs={refreshGifs}
               item={item}
             />
           </Layer>
         )}
-      </main>
+      </Main>
     </>
   );
 }
@@ -146,7 +142,9 @@ const GifsQuery = gql`
 const RemoveGifMutation = gql`
   mutation RemoveGifMutation($gif_id: ID!) {
     removeGif(input: { gif_id: $gif_id }) {
-      success
+      gif {
+        gif_id
+      }
     }
   }
 `;

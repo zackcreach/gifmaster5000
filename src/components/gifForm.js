@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { gql, useMutation } from "@apollo/client";
-import { getErrorMessage } from "../../lib/form";
+import { getErrorMessage } from "../../utils/form";
 import {
   Heading,
   Box,
@@ -13,8 +13,11 @@ import {
   Image,
   Text,
 } from "grommet";
+import { StatusGood, Alert } from "grommet-icons";
 
 import GifTags from "./gifTags";
+
+const MODAL_CLOSE_DELAY = 400;
 
 export default function GifForm(props) {
   const title = props.item ? "Edit Gif" : "Upload Gif";
@@ -97,8 +100,6 @@ export default function GifForm(props) {
         }
       }
 
-      console.log(value.tags);
-
       const variables = {
         file: imageData || {},
         gif_name: value.gif_name,
@@ -113,6 +114,7 @@ export default function GifForm(props) {
       }
 
       props.refreshGifs();
+      setTimeout(props.toggleModal, MODAL_CLOSE_DELAY);
     } catch (error) {
       setError({ message: getErrorMessage(error) });
     } finally {
@@ -135,11 +137,23 @@ export default function GifForm(props) {
     }
   }
 
+  function renderStatus() {
+    if (isLoading) {
+      return <Spinner />;
+    } else if (!isLoading && isSubmitted && error.message == null) {
+      return <StatusGood color="brand" />;
+    } else if (!isLoading && isSubmitted && error.message != null) {
+      return <Alert color="status-error" />;
+    }
+
+    return null;
+  }
+
   return (
     <Box pad="large" gap="medium" width="medium">
-      <Box direction="row" justify="between">
+      <Box direction="row" justify="between" align="center">
         <Heading level="3">{title}</Heading>
-        {isLoading && <Spinner />}
+        {renderStatus()}
       </Box>
 
       <Form
@@ -183,20 +197,14 @@ export default function GifForm(props) {
           </FormField>
         </Box>
 
-        {isSubmitted && (
+        {isSubmitted && error.message && (
           <Box pad={{ bottom: "medium" }}>
-            {error.message == null ? (
-              <Text color="status-ok">Success!</Text>
-            ) : (
-              <Text color="status-error">{error.message}</Text>
-            )}
+            <Text color="status-error">{error.message}</Text>
           </Box>
         )}
 
         <Box direction="row" gap="xsmall">
           <Button type="submit" label="Submit" disabled={isLoading} primary />
-
-          <Button type="reset" label="Reset" disabled={isLoading} />
         </Box>
       </Form>
     </Box>

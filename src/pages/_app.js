@@ -1,14 +1,15 @@
 import { ApolloProvider } from "@apollo/client";
 import { useApollo } from "../../apollo/client";
-import { Grommet } from "grommet";
+import { grommet, Grommet } from "grommet";
+import { deepMerge } from "grommet/utils";
 
 import "../styles/base/globals.css";
 
-const theme = {
+const theme = deepMerge(grommet, {
+  defaultMode: "dark",
   global: {
     colors: {
-      brand: "#0F00CD",
-      focus: "#13D2F2",
+      brand: "accent-1",
     },
     font: {
       family: "Roboto",
@@ -16,7 +17,7 @@ const theme = {
       height: "20px",
     },
   },
-};
+});
 
 export default function App({ Component, pageProps }) {
   const apolloClient = useApollo(pageProps.initialApolloState);

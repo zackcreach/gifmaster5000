@@ -4,15 +4,20 @@ import {
   Box,
   ResponsiveContext,
   Menu,
-  Image,
+  Text,
 } from "grommet";
 import { Grommet as GrommetIcon, Menu as MenuIcon } from "grommet-icons";
 
 export default function Header(props) {
   return (
-    <GrommetHeader background="light-4" pad="large" height="xsmall">
+    <GrommetHeader
+      background="dark-2"
+      pad="large"
+      height="xsmall"
+      border={{ color: "brand", side: "top", size: "small" }}
+    >
       <Anchor href="/">
-        <Image src="https://gif-master.s3.amazonaws.com/logo.gif" width={300} />
+        <Text size="xxlarge">Gif Master 5000</Text>
       </Anchor>
 
       <ResponsiveContext.Consumer>
@@ -25,16 +30,15 @@ export default function Header(props) {
                 icon={<MenuIcon color="brand" />}
                 items={[
                   {
-                    label: <Box pad="small">Upload New Gif</Box>,
-                    onClick: props.setIsModalOpen,
+                    label: <Box pad="small">Upload</Box>,
+                    onClick: props.toggleModal,
                   },
                 ]}
               />
             </Box>
           ) : (
             <Box justify="end" direction="row" gap="medium">
-              <Anchor label="Upload New Gif" onClick={props.handleClickLayer} />
-              <Anchor label="Login" />
+              <Anchor label="Upload" onClick={props.toggleModal} />
             </Box>
           )
         }

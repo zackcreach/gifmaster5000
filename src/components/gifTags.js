@@ -58,7 +58,7 @@ const Tag = ({ children, onRemove, ...rest }) => {
       <Text size="xsmall" margin={{ right: "xxsmall" }}>
         {children}
       </Text>
-      {onRemove && <FormClose size="small" color="white" />}
+      {onRemove && <FormClose size="small" />}
     </Box>
   );
 
