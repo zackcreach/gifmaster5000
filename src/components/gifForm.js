@@ -119,7 +119,7 @@ export default function GifForm(props) {
       }
 
       props.refreshGifs();
-      setTimeout(props.toggleModal, MODAL_CLOSE_DELAY);
+      setTimeout(props.toggleModalUpload, MODAL_CLOSE_DELAY);
     } catch (error) {
       setError({ message: getErrorMessage(error) });
     } finally {

@@ -4,6 +4,8 @@ import { Close, Edit } from "grommet-icons";
 import styles from "./gifCard.module.css";
 
 export default function GifCard(props) {
+  const userId = props.user.data?.viewer?.user_id;
+
   function handleClickEdit(event) {
     props.setItem({
       gif_id: props.gif_id,
@@ -14,29 +16,27 @@ export default function GifCard(props) {
   }
 
   return (
-    <Card
-      key={props.gif_id}
-      elevation="none"
-      border={{ side: "all", size: "xsmall", color: "dark-2" }}
-    >
-      <CardHeader
-        className={styles.header}
-        pad={{ horizontal: "small", vertical: "xxsmall" }}
-        background="dark-2"
-      >
-        <div
-          className={styles.closeContainer}
-          onClick={props.handleClickDelete}
-          id={props.gif_id}
-          data-filename={props.file?.filename}
+    <Card key={props.gif_id} elevation="none" round={false}>
+      {userId && (
+        <CardHeader
+          className={styles.header}
+          pad={{ top: "xxsmall", horizontal: "small", bottom: "xsmall" }}
+          background="dark-2"
         >
-          <Close size="small" color="brand" />
-        </div>
+          <div
+            className={styles.closeContainer}
+            onClick={props.handleClickDelete}
+            id={props.gif_id}
+            data-filename={props.file?.filename}
+          >
+            <Close size="small" color="white" />
+          </div>
 
-        <div className={styles.editContainer} onClick={handleClickEdit}>
-          <Edit size="small" color="brand" />
-        </div>
-      </CardHeader>
+          <div className={styles.editContainer} onClick={handleClickEdit}>
+            <Edit size="small" color="white" />
+          </div>
+        </CardHeader>
+      )}
 
       <CardBody>
         <Image src={props.file?.url} fit="cover" />

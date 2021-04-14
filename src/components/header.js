@@ -1,14 +1,18 @@
-import {
-  Header as GrommetHeader,
-  Anchor,
-  Box,
-  ResponsiveContext,
-  Menu,
-  Text,
-} from "grommet";
-import { Menu as MenuIcon } from "grommet-icons";
+import { Header as GrommetHeader, Anchor, Box, Text } from "grommet";
+import { useRouter } from "next/router";
 
 export default function Header(props) {
+  const router = useRouter();
+  const userId = props.user.data?.viewer?.user_id;
+
+  function handleClickLogin() {
+    if (userId) {
+      router.push("/signout");
+    } else {
+      router.push("/signin");
+    }
+  }
+
   return (
     <GrommetHeader
       background="dark-2"
@@ -22,29 +26,13 @@ export default function Header(props) {
         </Text>
       </Anchor>
 
-      <ResponsiveContext.Consumer>
-        {(size) =>
-          size === "small" ? (
-            <Box justify="end">
-              <Menu
-                a11yTitle="Navigation Menu"
-                dropProps={{ align: { top: "bottom", right: "right" } }}
-                icon={<MenuIcon color="brand" />}
-                items={[
-                  {
-                    label: <Box pad="small">Upload</Box>,
-                    onClick: props.toggleModal,
-                  },
-                ]}
-              />
-            </Box>
-          ) : (
-            <Box justify="end" direction="row" gap="medium">
-              <Anchor label="Upload" onClick={props.toggleModal} />
-            </Box>
-          )
-        }
-      </ResponsiveContext.Consumer>
+      <Box justify="end" direction="row" gap="medium">
+        {userId && <Anchor label="Upload" onClick={props.toggleModalUpload} />}
+        <Anchor
+          label={userId ? "Sign out" : "Login"}
+          onClick={handleClickLogin}
+        />
+      </Box>
     </GrommetHeader>
   );
 }

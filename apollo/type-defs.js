@@ -44,6 +44,8 @@ export const typeDefs = gql`
   }
   input GetGifsInput {
     search: String
+    limit: Int
+    offset: Int
   }
   input GetGifInput {
     gif_name: String!
@@ -63,6 +65,10 @@ export const typeDefs = gql`
   }
   input RemoveGifInput {
     gif_id: ID!
+  }
+  input GetTagsInput {
+    limit: Int
+    offset: Int
   }
   input GetTagInput {
     tag_id: String!
@@ -113,9 +119,9 @@ export const typeDefs = gql`
     user(input: GetUserInput!): User!
     users: [User]!
     viewer: User
-    gifs(input: GetGifsInput): [Gif]
+    gifs(input: GetGifsInput!): [Gif]
     gif(input: GetGifInput!): Gif!
-    tags: [Tag]
+    tags(input: GetTagsInput!): [Tag]
     tag(input: GetTagInput!): Tag!
   }
 

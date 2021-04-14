@@ -1,11 +1,8 @@
 import { useMemo } from "react";
-import { ApolloClient, InMemoryCache, ApolloLink } from "@apollo/client";
-import { createUploadLink } from "apollo-upload-client";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
 import merge from "deepmerge";
 
 let apolloClient;
-
-export const APOLLO_STATE_PROP_NAME = "__APOLLO_STATE__";
 
 function createIsomorphLink() {
   if (typeof window === "undefined") {
@@ -14,13 +11,10 @@ function createIsomorphLink() {
     return new SchemaLink({ schema });
   } else {
     const { HttpLink } = require("@apollo/client/link/http");
-    const uploadLink = createUploadLink({ uri: "http://localhost:1338" });
-    const httpLink = new HttpLink({
+    return new HttpLink({
       uri: "/api/graphql",
       credentials: "same-origin",
     });
-
-    return ApolloLink.from([httpLink, uploadLink]);
   }
 }
 
@@ -53,14 +47,6 @@ export function initializeApollo(initialState = null) {
   if (!apolloClient) apolloClient = _apolloClient;
 
   return _apolloClient;
-}
-
-export function addApolloState(client, pageProps) {
-  if (pageProps?.props) {
-    pageProps.props[APOLLO_STATE_PROP_NAME] = client.cache.extract();
-  }
-
-  return pageProps;
 }
 
 export function useApollo(initialState) {

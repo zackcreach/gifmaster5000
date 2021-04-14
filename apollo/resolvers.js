@@ -1,14 +1,7 @@
 import { AuthenticationError, UserInputError } from "apollo-server-micro";
 import GraphQLJSON from "graphql-type-json";
 import { createUser, findUser, validatePassword } from "../lib/user";
-import {
-  getGifList,
-  getGif,
-  createGif,
-  editGif,
-  deleteGif,
-  searchGifList,
-} from "../lib/gifs";
+import { getGifList, getGif, createGif, editGif, deleteGif } from "../lib/gifs";
 import { getTagList, getTag, createTag, editTag, deleteTag } from "../lib/tags";
 import { setLoginSession, getLoginSession } from "../lib/auth";
 import { removeTokenCookie } from "../lib/auth-cookies.js";
@@ -30,7 +23,6 @@ export const resolvers = {
       }
     },
     async gifs(_parent, args, _context, _info) {
-      console.log({ args });
       try {
         const result = await getGifList(args.input);
 
@@ -50,9 +42,9 @@ export const resolvers = {
         throw new Error(`Error: gif could not be retrieved. Details: ${error}`);
       }
     },
-    async tags(_parent, _args, _context, _info) {
+    async tags(_parent, args, _context, _info) {
       try {
-        const result = await getTagList();
+        const result = await getTagList(args.input);
 
         return result;
       } catch (error) {

@@ -1,14 +1,14 @@
 import Head from "next/head";
-import { useState, useContext, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { initializeApollo } from "../../apollo/client";
 import { Main, Layer, Text, Grid, Box } from "grommet";
 import { getErrorMessage } from "../../utils/form";
 
-import Header from "../components/header";
 import GifForm from "../components/gifForm";
 import GifCard from "../components/gifCard";
 import GifSearch from "../components/gifSearch";
+import UserForm from "../components/userForm";
 
 export default function Home(props) {
   const [refreshGifs, refreshGifsResponse] = useLazyQuery(GifsQuery, {
@@ -20,7 +20,6 @@ export default function Home(props) {
   const [item, setItem] = useState(null);
   const [gifs, setGifs] = useState(props.gifs);
   const [error, setError] = useState({});
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (refreshGifsResponse.called === false) {
@@ -38,19 +37,15 @@ export default function Home(props) {
 
   useEffect(() => {
     if (item != null) {
-      toggleModal();
+      props.toggleModalUpload();
     }
   }, [item]);
 
   useEffect(() => {
-    if (isModalOpen === false) {
+    if (props.isUploadModalOpen === false) {
       setItem(null);
     }
-  }, [isModalOpen]);
-
-  function toggleModal() {
-    setIsModalOpen((prevState) => !prevState);
-  }
+  }, [props.isUploadModalOpen]);
 
   async function handleClickDelete(event) {
     const gif_id = event.target.id;
@@ -74,53 +69,54 @@ export default function Home(props) {
   }
 
   return (
-    <>
+    <Main>
       <Head>
         <title>Gif Master 5000</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Main background="dark-1" style={{ minHeight: "100vh" }}>
-        <Header toggleModal={toggleModal} />
+      <Box
+        pad="large"
+        pad={{ top: "medium", horizontal: "large", bottom: "large" }}
+      >
+        <GifSearch refreshGifs={refreshGifs} />
 
-        <Box
-          pad="large"
-          pad={{ top: "medium", horizontal: "large", bottom: "large" }}
-        >
-          <GifSearch refreshGifs={refreshGifs} />
+        {error.message && <Text color="status-error">{error.message}</Text>}
 
-          {error.message && <Text color="status-error">{error.message}</Text>}
-
-          <Grid columns="small" gap="small">
-            {gifs.map((gif) => (
-              <GifCard
-                key={gif.gif_name}
-                handleClickDelete={handleClickDelete}
-                setItem={setItem}
-                {...gif}
-              />
-            ))}
-          </Grid>
-        </Box>
-
-        {isModalOpen && (
-          <Layer onClickOutside={toggleModal} onEsc={toggleModal} modal>
-            <GifForm
-              availableTags={props.tags}
-              toggleModal={toggleModal}
-              refreshGifs={refreshGifs}
-              item={item}
+        <Grid columns="small" gap="small">
+          {gifs.map((gif) => (
+            <GifCard
+              user={props.user}
+              key={gif.gif_name}
+              handleClickDelete={handleClickDelete}
+              setItem={setItem}
+              {...gif}
             />
-          </Layer>
-        )}
-      </Main>
-    </>
+          ))}
+        </Grid>
+      </Box>
+
+      {props.isUploadModalOpen && (
+        <Layer
+          onClickOutside={props.toggleModalUpload}
+          onEsc={props.toggleModalUpload}
+          modal
+        >
+          <GifForm
+            availableTags={props.tags}
+            toggleModalUpload={props.toggleModalUpload}
+            refreshGifs={refreshGifs}
+            item={item}
+          />
+        </Layer>
+      )}
+    </Main>
   );
 }
 
 const TagsQuery = gql`
-  query TagsQuery {
-    tags {
+  query TagsQuery($limit: Int, $offset: Int) {
+    tags(input: { limit: $limit, offset: $offset }) {
       tag_id
       tag_name
     }
@@ -128,8 +124,8 @@ const TagsQuery = gql`
 `;
 
 const GifsQuery = gql`
-  query GifsQuery($search: String) {
-    gifs(input: { search: $search }) {
+  query GifsQuery($search: String, $limit: Int, $offset: Int) {
+    gifs(input: { search: $search, limit: $limit, offset: $offset }) {
       gif_id
       gif_name
       file
@@ -154,17 +150,18 @@ const RemoveGifMutation = gql`
 `;
 
 export async function getServerSideProps() {
-  const apolloClient = initializeApollo();
+  const { query } = initializeApollo();
 
   const props = { gifs: [], tags: [] };
 
   try {
-    const gifsResponse = await apolloClient.query({ query: GifsQuery });
+    const gifsResponse = await query({ query: GifsQuery });
     props.gifs = gifsResponse?.data?.gifs || [];
 
-    const tagsResponse = await apolloClient.query({ query: TagsQuery });
+    const tagsResponse = await query({ query: TagsQuery });
     props.tags = tagsResponse?.data?.tags || [];
   } catch (error) {
+    console.log(error);
     props.error = JSON.stringify(error);
   } finally {
     return {
