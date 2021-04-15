@@ -180,7 +180,6 @@ export default function GifForm(props) {
         <Box pad={{ bottom: "medium" }}>
           <FileInput
             accept=".gif"
-            required={!props.item?.gif_id}
             onChange={handleChangeFile}
             onDrop={handleChangeFile}
             disabled={isLoading}
