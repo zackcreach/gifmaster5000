@@ -1,63 +1,54 @@
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/router";
 import { getErrorMessage } from "../../utils/form";
 import { Box, FormField, TextInput, Form } from "grommet";
+import { useDebouncedEffect } from "../hooks/useDebouncedEffect";
 
 export default function GifSearch(props) {
+  const router = useRouter();
+  const searchRef = useRef();
+
   const defaultValue = {
-    search: "",
+    search: props.search || "",
   };
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [error, setError] = useState({});
   const [value, setValue] = useState(defaultValue);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isSubmitted === true && error.message == null) {
-    }
-  }, [isSubmitted]);
+    searchRef.current.focus();
+  }, []);
 
-  function handleSubmit(event) {
-    event.preventDefault();
+  useDebouncedEffect(handleValueUpdate, 500, [value]);
 
-    setIsLoading(true);
-
-    // Modify search field to satisfy postgres' to_tsquery() syntax
-    const search = event.value.search.replace(/\s/g, " | ");
-
-    try {
-      props.refreshGifs({
-        variables: {
-          search,
-        },
-      });
-    } catch (error) {
-      setError({ message: getErrorMessage(error) });
-    } finally {
-      setIsLoading(false);
-      setIsSubmitted(true);
+  function handleValueUpdate() {
+    if (defaultValue.search === value.search) {
+      return;
+    } else if (!value.search) {
+      props.refreshGifs();
+      router.push({ query: null });
+    } else {
+      searchGifs(value.search);
+      router.push({ query: { search: value.search } });
     }
   }
 
-  function handleReset() {
-    handleChange(defaultValue);
+  function searchGifs(value) {
+    try {
+      // Modify search field to satisfy postgres' to_tsquery() syntax
+      const search = value.replace(/\s/g, " | ");
+
+      props.refreshGifs({ variables: { search } });
+    } catch (error) {
+      props.setError({ message: getErrorMessage(error) });
+    }
   }
 
   function handleChange(nextValue) {
-    if (!nextValue.search) {
-      props.refreshGifs();
-    }
-
     setValue(nextValue);
   }
 
   return (
-    <Form
-      value={value}
-      onSubmit={handleSubmit}
-      onChange={handleChange}
-      onReset={handleReset}
-    >
+    <Form value={value} onChange={handleChange}>
       <Box direction="row" pad={{ bottom: "medium" }}>
         <FormField
           name="search"
@@ -68,6 +59,7 @@ export default function GifSearch(props) {
             htmlFor="search-input-id"
             name="search"
             placeholder="Search..."
+            ref={searchRef}
           />
         </FormField>
       </Box>

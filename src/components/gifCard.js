@@ -20,7 +20,7 @@ export default function GifCard(props) {
       {userId && (
         <CardHeader
           className={styles.header}
-          pad={{ top: "xxsmall", horizontal: "small", bottom: "xsmall" }}
+          pad={{ top: "xxsmall", horizontal: "xsmall", bottom: "xsmall" }}
           background="dark-2"
         >
           <div

@@ -1,5 +1,7 @@
-import { Header as GrommetHeader, Anchor, Box, Text } from "grommet";
+import { Header as GrommetHeader, Anchor, Box, Text, Image } from "grommet";
 import { useRouter } from "next/router";
+
+import styles from "./header.module.css";
 
 export default function Header(props) {
   const router = useRouter();
@@ -16,22 +18,16 @@ export default function Header(props) {
   return (
     <GrommetHeader
       background="dark-2"
-      pad="large"
+      pad={{ horizontal: "large", top: "medium", bottom: "small" }}
       height="xsmall"
-      border={{ color: "brand", side: "top", size: "medium" }}
     >
-      <Anchor href="/">
-        <Text size="xxlarge" weight={500}>
-          Gif Master 5000
-        </Text>
-      </Anchor>
-
       <Box justify="end" direction="row" gap="medium">
-        {userId && <Anchor label="Upload" onClick={props.toggleModalUpload} />}
-        <Anchor
-          label={userId ? "Sign out" : "Login"}
-          onClick={handleClickLogin}
-        />
+        <Anchor href="/">
+          <Image
+            src="https://gif-master.s3.amazonaws.com/logo.png"
+            className={styles.image}
+          />
+        </Anchor>
       </Box>
     </GrommetHeader>
   );

@@ -1,0 +1,4 @@
+//
+// Keys
+//
+export const errorKeys = {};

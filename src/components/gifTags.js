@@ -50,12 +50,11 @@ const Tag = ({ children, onRemove, ...rest }) => {
       direction="row"
       align="center"
       background="brand"
-      pad={{ horizontal: "small", vertical: "xxsmall" }}
+      pad={{ right: "xsmall", left: "small", vertical: "xxsmall" }}
       margin={{ vertical: "xxsmall" }}
-      round="medium"
       {...rest}
     >
-      <Text size="xsmall" margin={{ right: "xxsmall" }}>
+      <Text size="xsmall" margin={{ right: "xxsmall" }} weight={400}>
         {children}
       </Text>
       {onRemove && <FormClose size="small" />}
@@ -96,23 +95,19 @@ const TagInput = ({ value = [], onAdd, onChange, onRemove, ...rest }) => {
   const renderValue = () =>
     value.map((node) => (
       <Tag margin="xxsmall" key={node.value} onRemove={() => onRemove(node)}>
-        {node.label || node}
+        <Text size="xsmall">{node.label || node}</Text>
       </Tag>
     ));
 
   return (
     <Keyboard onEnter={onEnter}>
-      <Box
-        direction="row"
-        align="center"
-        pad={{ horizontal: "xsmall" }}
-        ref={boxRef}
-        wrap
-      >
+      <Box direction="row" align="center" ref={boxRef} wrap>
         {value.length > 0 && renderValue()}
-        <Box flex style={{ minWidth: "120px" }}>
+        <Box flex style={{ minWidth: "120px" }} margin="xxsmall">
           <TextInput
+            style={{ padding: "2px 6px" }}
             type="search"
+            size="small"
             plain
             dropTarget={box}
             {...rest}

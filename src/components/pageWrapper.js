@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { gql, useQuery } from "@apollo/client";
 import { grommet, Grommet, Box } from "grommet";
 import { deepMerge } from "grommet/utils";
@@ -6,23 +6,12 @@ import { useRouter } from "next/router";
 
 import Header from "../components/header";
 
-const theme = deepMerge(grommet, {
-  defaultMode: "dark",
-  global: {
-    colors: {
-      brand: "accent-1",
-    },
-    font: {
-      family: "Roboto",
-      size: "18px",
-      height: "20px",
-    },
-  },
-});
-
 export default function PageWrapper({ Component, pageProps }) {
+  const grommetRef = useRef();
   const router = useRouter();
   const user = useQuery(UserQuery, { notifyOnNetworkStatusChange: true });
+  const userId = user.data?.viewer?.user_id;
+
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
 
@@ -38,20 +27,29 @@ export default function PageWrapper({ Component, pageProps }) {
     setIsUserModalOpen((prevState) => !prevState);
   }
 
+  function handleDragOver(event) {
+    event.preventDefault();
+
+    if (userId) {
+      setIsUploadModalOpen(true);
+    }
+  }
+
   return (
-    <Grommet theme={theme}>
+    <Grommet theme={theme} full background="dark-1" onDragOver={handleDragOver}>
       <Header
         toggleModalUpload={toggleModalUpload}
         toggleModalUser={toggleModalUser}
         user={user}
       />
 
-      <Box background="dark-1" style={{ minHeight: "100vh" }}>
+      <Box pad={{ horizontal: "large" }}>
         <Component
           user={user}
           toggleModalUpload={toggleModalUpload}
           setIsUploadModalOpen={setIsUploadModalOpen}
           isUploadModalOpen={isUploadModalOpen}
+          grommetRef={grommetRef}
           {...pageProps}
         />
       </Box>
@@ -73,3 +71,41 @@ const UserQuery = gql`
     }
   }
 `;
+
+const theme = deepMerge(grommet, {
+  global: {
+    colors: {
+      brand: "darkorange",
+      focus: "orange",
+      control: {
+        dark: "linear-gradient(0, orange, darkorange)",
+      },
+    },
+    font: {
+      family: "Roboto",
+      size: "18px",
+      height: "20px",
+    },
+  },
+  button: {
+    border: {
+      radius: 0,
+    },
+  },
+  tag: {
+    border: {
+      radius: 0,
+    },
+  },
+  anchor: {
+    color: "darkorange",
+  },
+  fileInput: {
+    dragOver: {
+      background: "dark-2",
+      border: {
+        color: "focus",
+      },
+    },
+  },
+});

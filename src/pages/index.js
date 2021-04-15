@@ -8,7 +8,6 @@ import { getErrorMessage } from "../../utils/form";
 import GifForm from "../components/gifForm";
 import GifCard from "../components/gifCard";
 import GifSearch from "../components/gifSearch";
-import UserForm from "../components/userForm";
 
 export default function Home(props) {
   const [refreshGifs, refreshGifsResponse] = useLazyQuery(GifsQuery, {
@@ -75,11 +74,12 @@ export default function Home(props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Box
-        pad="large"
-        pad={{ top: "medium", horizontal: "large", bottom: "large" }}
-      >
-        <GifSearch refreshGifs={refreshGifs} />
+      <Box pad={{ top: "medium", bottom: "large" }}>
+        <GifSearch
+          refreshGifs={refreshGifs}
+          setError={setError}
+          search={props.search}
+        />
 
         {error.message && <Text color="status-error">{error.message}</Text>}
 
@@ -103,6 +103,7 @@ export default function Home(props) {
           modal
         >
           <GifForm
+            grommetRef={props.grommetRef}
             availableTags={props.tags}
             toggleModalUpload={props.toggleModalUpload}
             refreshGifs={refreshGifs}
@@ -149,13 +150,17 @@ const RemoveGifMutation = gql`
   }
 `;
 
-export async function getServerSideProps() {
+export async function getServerSideProps(req) {
+  const search = req.query?.search || null;
   const { query } = initializeApollo();
 
-  const props = { gifs: [], tags: [] };
+  const props = { gifs: [], tags: [], search };
 
   try {
-    const gifsResponse = await query({ query: GifsQuery });
+    const gifsResponse = await query({
+      query: GifsQuery,
+      variables: { search },
+    });
     props.gifs = gifsResponse?.data?.gifs || [];
 
     const tagsResponse = await query({ query: TagsQuery });

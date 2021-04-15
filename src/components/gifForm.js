@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { gql, useMutation } from "@apollo/client";
 import { getErrorMessage } from "../../utils/form";
 import {
@@ -29,6 +29,7 @@ export default function GifForm(props) {
     tags: props.item?.tags || [],
   };
 
+  const nameInputRef = useRef();
   const [localImageUrl, setLocalImageUrl] = useState(defaultValue.file?.url);
   const [upload, setUpload] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -39,6 +40,10 @@ export default function GifForm(props) {
   const [addTag] = useMutation(AddTagMutation);
   const [addGif] = useMutation(AddGifMutation);
   const [editGif] = useMutation(EditGifMutation);
+
+  useEffect(() => {
+    nameInputRef.current.focus();
+  }, []);
 
   useEffect(() => {
     if (isSubmitted === true && error.message == null) {
@@ -177,6 +182,7 @@ export default function GifForm(props) {
             accept=".gif"
             required={!props.item?.gif_id}
             onChange={handleChangeFile}
+            onDrop={handleChangeFile}
             disabled={isLoading}
             renderFile={(file) => (
               <Box direction="row" gap="small" pad={{ left: "medium" }}>
@@ -188,7 +194,12 @@ export default function GifForm(props) {
         </Box>
 
         <FormField name="gif_name" htmlFor="name-input-id" label="Name">
-          <TextInput htmlFor="name-input-id" name="gif_name" required />
+          <TextInput
+            htmlFor="name-input-id"
+            name="gif_name"
+            ref={nameInputRef}
+            required
+          />
         </FormField>
 
         <Box pad={{ bottom: "large" }}>
