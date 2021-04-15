@@ -20,6 +20,7 @@ export default function Header(props) {
       background="dark-2"
       pad={{ horizontal: "large", top: "medium", bottom: "small" }}
       height="xsmall"
+      onDragOver={props.handleDragOver}
     >
       <Box justify="end" direction="row" gap="medium">
         <Anchor href="/">

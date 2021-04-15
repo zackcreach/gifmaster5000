@@ -36,10 +36,11 @@ export default function PageWrapper({ Component, pageProps }) {
   }
 
   return (
-    <Grommet theme={theme} full background="dark-1" onDragOver={handleDragOver}>
+    <Grommet theme={theme} full background="dark-1">
       <Header
         toggleModalUpload={toggleModalUpload}
         toggleModalUser={toggleModalUser}
+        handleDragOver={handleDragOver}
         user={user}
       />
 
