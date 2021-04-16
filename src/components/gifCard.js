@@ -39,7 +39,10 @@ export default function GifCard(props) {
       )}
 
       <CardBody>
-        <Image src={props.file?.url} fit="cover" />
+        <Image
+          src={`${props.publicHost}/${props.file?.filename}`}
+          fit="cover"
+        />
       </CardBody>
     </Card>
   );

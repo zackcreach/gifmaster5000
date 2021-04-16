@@ -41,6 +41,7 @@ export default function PageWrapper({ Component, pageProps }) {
         toggleModalUpload={toggleModalUpload}
         toggleModalUser={toggleModalUser}
         handleDragOver={handleDragOver}
+        publicHost={pageProps.globals.publicHost}
         user={user}
       />
 

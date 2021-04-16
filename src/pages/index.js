@@ -71,7 +71,7 @@ export default function Home(props) {
     <Main>
       <Head>
         <title>Gif Master 5000</title>
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href={`${props.globals.publicHost}/favicon.ico`} />
       </Head>
 
       <Box pad={{ top: "medium", bottom: "large" }}>
@@ -90,6 +90,7 @@ export default function Home(props) {
               key={gif.gif_name}
               handleClickDelete={handleClickDelete}
               setItem={setItem}
+              publicHost={props.globals.publicHost}
               {...gif}
             />
           ))}
@@ -154,7 +155,11 @@ export async function getServerSideProps(req) {
   const search = req.query?.search || null;
   const { query } = initializeApollo();
 
-  const props = { gifs: [], tags: [], search };
+  const props = {
+    gifs: [],
+    tags: [],
+    search,
+  };
 
   try {
     const gifsResponse = await query({

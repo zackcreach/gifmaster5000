@@ -8,6 +8,10 @@ import PageWrapper from "../components/pageWrapper";
 export default function App(props) {
   const apolloClient = useApollo(props.pageProps.initialApolloState);
 
+  props.pageProps.globals = {
+    publicHost: process.env.publicHost,
+  };
+
   return (
     <ApolloProvider client={apolloClient}>
       <PageWrapper {...props} />
