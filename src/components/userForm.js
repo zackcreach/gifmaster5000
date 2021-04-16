@@ -47,7 +47,7 @@ export default function UserForm() {
 
       await router.push("/");
     } catch (error) {
-      console.log({ error });
+      console.log(error);
       setError({ message: getErrorMessage(error) });
     } finally {
       setIsLoading(false);
