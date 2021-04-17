@@ -1,4 +1,3 @@
-import Head from "next/head";
 import { useState, useEffect } from "react";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { initializeApollo } from "../../apollo/client";
@@ -68,29 +67,6 @@ export default function Home(props) {
 
   return (
     <Main>
-      <Head>
-        <title>Gif Master 5000</title>
-        <link
-          rel="apple-touch-icon"
-          href={`${props.globals.publicHost}/favicon.ico`}
-        />
-        <link
-          sizes="72x72"
-          rel="apple-touch-icon"
-          href={`${props.globals.publicHost}/favicon.ico`}
-        />
-        <link
-          rel="apple-touch-icon"
-          sizes="114x114"
-          href={`${props.globals.publicHost}/favicon.ico`}
-        />
-        <link
-          rel="apple-touch-startup-image"
-          href={`${props.globals.publicHost}/favicon.ico`}
-        />
-        <link rel="icon" href={`${props.globals.publicHost}/favicon.ico`} />
-      </Head>
-
       <Box pad={{ top: "medium", bottom: "large" }}>
         <GifSearch
           refreshGifs={refreshGifs}
