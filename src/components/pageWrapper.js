@@ -48,7 +48,7 @@ export default function PageWrapper({ Component, pageProps }) {
         <meta name="og:title" content={title} />
         <meta name="og:type" content="website" />
         <meta name="og:url" content="https://www.gifmaster5000.com" />
-        <meta name="og:image" content={`${publicHost}/logo.png`} />
+        <meta name="og:image" content={`${publicHost}/favicon.png`} />
         <meta name="og:site_name" content={title} />
         <meta name="og:description" content={description} />
         <link rel="apple-touch-icon" href={`${publicHost}/favicon.png`} />{" "}
