@@ -27,7 +27,7 @@ export default function GifCard(props) {
             className={styles.closeContainer}
             onClick={props.handleClickDelete}
             id={props.gif_id}
-            data-filename={props.file?.filename}
+            data-key={props.file?.url?.relative}
           >
             <Close size="small" color="white" />
           </div>
@@ -40,7 +40,7 @@ export default function GifCard(props) {
 
       <CardBody>
         <Image
-          src={`${props.publicHost}/${props.file?.filename}`}
+          src={`${props.publicHost}/${props.file?.url?.relative}`}
           fit="cover"
         />
       </CardBody>

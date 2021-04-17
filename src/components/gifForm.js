@@ -21,16 +21,26 @@ const MODAL_CLOSE_DELAY = 400;
 
 export default function GifForm(props) {
   const title = props.item ? "Edit Gif" : "Upload Gif";
+  const relativeUrl = props.item?.file?.url?.relative;
+  const userId = props.user.data?.viewer?.user_id;
 
   const defaultValue = {
     gif_id: props.item?.gif_id || null,
     gif_name: props.item?.gif_name || null,
     file: props.item?.file || {},
     tags: props.item?.tags || [],
+    created_by: userId || null,
+    updated_by: userId || null,
+  };
+
+  const defaultState = {
+    localImageUrl: relativeUrl ? `${props.publicHost}/${relativeUrl}` : null,
   };
 
   const nameInputRef = useRef();
-  const [localImageUrl, setLocalImageUrl] = useState(defaultValue.file?.url);
+  const [localImageUrl, setLocalImageUrl] = useState(
+    defaultState.localImageUrl
+  );
   const [upload, setUpload] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState({});
@@ -99,6 +109,8 @@ export default function GifForm(props) {
           const tagResponse = await addTag({
             variables: {
               tag_name: tag,
+              created_by: defaultValue.created_by,
+              updated_by: defaultValue.updated_by,
             },
           });
 
@@ -114,12 +126,14 @@ export default function GifForm(props) {
         file: imageData || {},
         gif_name: value.gif_name,
         tags: modifiedTags,
+        updated_by: defaultValue.updated_by,
       };
 
       if (defaultValue.gif_id != null) {
         variables.gif_id = value.gif_id;
         await editGif({ variables });
       } else {
+        variables.created_by = defaultValue.created_by;
         await addGif({ variables });
       }
 
@@ -177,7 +191,7 @@ export default function GifForm(props) {
           <Image src={localImageUrl} />
         </Box>
 
-        <Box pad={{ bottom: "medium" }}>
+        <Box pad={{ bottom: "medium" }} style={{ overflow: "hidden" }}>
           <FileInput
             accept=".gif"
             onChange={handleChangeFile}
@@ -227,8 +241,18 @@ export default function GifForm(props) {
 }
 
 const AddTagMutation = gql`
-  mutation AddTagMutation($tag_name: String!) {
-    addTag(input: { tag_name: $tag_name }) {
+  mutation AddTagMutation(
+    $tag_name: String!
+    $created_by: ID!
+    $updated_by: ID!
+  ) {
+    addTag(
+      input: {
+        tag_name: $tag_name
+        created_by: $created_by
+        updated_by: $updated_by
+      }
+    ) {
       tag {
         tag_id
       }
@@ -237,8 +261,22 @@ const AddTagMutation = gql`
 `;
 
 const AddGifMutation = gql`
-  mutation AddGifMutation($file: JSON!, $gif_name: String!, $tags: [String]) {
-    addGif(input: { file: $file, gif_name: $gif_name, tags: $tags }) {
+  mutation AddGifMutation(
+    $file: JSON!
+    $gif_name: String!
+    $tags: [String]
+    $created_by: ID!
+    $updated_by: ID!
+  ) {
+    addGif(
+      input: {
+        file: $file
+        gif_name: $gif_name
+        tags: $tags
+        created_by: $created_by
+        updated_by: $updated_by
+      }
+    ) {
       gif {
         gif_id
       }
@@ -252,9 +290,16 @@ const EditGifMutation = gql`
     $gif_name: String!
     $file: JSON!
     $tags: [String]
+    $updated_by: ID!
   ) {
     editGif(
-      input: { gif_id: $gif_id, gif_name: $gif_name, file: $file, tags: $tags }
+      input: {
+        gif_id: $gif_id
+        gif_name: $gif_name
+        file: $file
+        tags: $tags
+        updated_by: $updated_by
+      }
     ) {
       gif {
         gif_id

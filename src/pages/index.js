@@ -15,7 +15,6 @@ export default function Home(props) {
   });
 
   const [removeGif] = useMutation(RemoveGifMutation);
-
   const [item, setItem] = useState(null);
   const [gifs, setGifs] = useState(props.gifs);
   const [error, setError] = useState({});
@@ -48,11 +47,11 @@ export default function Home(props) {
 
   async function handleClickDelete(event) {
     const gif_id = event.target.id;
-    const filename = event.target.dataset?.filename;
+    const key = event.target.dataset?.key;
 
     try {
       // Remove image from file storage
-      await fetch(`/api/image/delete?filename=${filename}`, { method: "POST" });
+      await fetch(`/api/image/delete?key=${key}`, { method: "POST" });
 
       // Delete record from db
       const response = await removeGif({
@@ -71,6 +70,24 @@ export default function Home(props) {
     <Main>
       <Head>
         <title>Gif Master 5000</title>
+        <link
+          rel="apple-touch-icon"
+          href={`${props.globals.publicHost}/favicon.ico`}
+        />
+        <link
+          sizes="72x72"
+          rel="apple-touch-icon"
+          href={`${props.globals.publicHost}/favicon.ico`}
+        />
+        <link
+          rel="apple-touch-icon"
+          sizes="114x114"
+          href={`${props.globals.publicHost}/favicon.ico`}
+        />
+        <link
+          rel="apple-touch-startup-image"
+          href={`${props.globals.publicHost}/favicon.ico`}
+        />
         <link rel="icon" href={`${props.globals.publicHost}/favicon.ico`} />
       </Head>
 
@@ -104,6 +121,8 @@ export default function Home(props) {
           modal
         >
           <GifForm
+            user={props.user}
+            publicHost={props.globals.publicHost}
             grommetRef={props.grommetRef}
             availableTags={props.tags}
             toggleModalUpload={props.toggleModalUpload}

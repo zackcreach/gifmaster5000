@@ -1,10 +1,10 @@
 import { deleteImage } from "../../../../lib/file";
 
 export default async function handler(req, res) {
-  const filename = req.query.filename;
+  const key = req.query.key;
 
   try {
-    const data = await deleteImage(filename);
+    const data = await deleteImage(key);
 
     res.status(200).json({ data });
   } catch (error) {

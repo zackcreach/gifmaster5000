@@ -18,14 +18,18 @@ export const typeDefs = gql`
     gif_name: String!
     file: JSON!
     tags: [Tag]
-    created_ts: String!
-    updated_ts: String!
+    created_ts: String
+    created_by: String
+    updated_ts: String
+    updated_by: String
   }
   type Tag {
     tag_id: ID!
     tag_name: String!
-    created_ts: String!
-    updated_ts: String!
+    created_ts: String
+    created_by: String
+    updated_ts: String
+    updated_by: String
   }
 
   #
@@ -56,12 +60,15 @@ export const typeDefs = gql`
     gif_name: String!
     file: JSON!
     tags: [String]
+    created_by: ID!
+    updated_by: ID!
   }
   input EditGifInput {
     gif_id: ID!
     gif_name: String!
     file: JSON!
     tags: [String]
+    updated_by: ID!
   }
   input RemoveGifInput {
     gif_id: ID!
@@ -75,10 +82,13 @@ export const typeDefs = gql`
   }
   input AddTagInput {
     tag_name: String!
+    created_by: ID!
+    updated_by: ID!
   }
   input EditTagInput {
     tag_id: ID!
     tag_name: String!
+    updated_by: ID!
   }
   input RemoveTagInput {
     tag_id: ID!
