@@ -2,7 +2,10 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { getErrorMessage } from "../../utils/form";
 import { Box, FormField, TextInput, Form } from "grommet";
+import { Close } from "grommet-icons";
 import { useDebouncedEffect } from "../hooks/useDebouncedEffect";
+
+import styles from "./gifSearch.module.css";
 
 export default function GifSearch(props) {
   const router = useRouter();
@@ -35,7 +38,7 @@ export default function GifSearch(props) {
   function searchGifs(value) {
     try {
       // Modify search field to satisfy postgres' to_tsquery() syntax
-      const search = value.replace(/\s/g, " | ");
+      const search = value.trim().replace(/\s/g, " | ");
 
       props.refreshGifs({ variables: { search } });
     } catch (error) {
@@ -47,19 +50,30 @@ export default function GifSearch(props) {
     setValue(nextValue);
   }
 
+  function handleClickClose(event) {
+    handleChange({ ...value, search: "" });
+    searchRef.current.focus();
+  }
+
   return (
     <Form value={value} onChange={handleChange}>
       <Box direction="row" pad={{ bottom: "medium" }}>
         <FormField
           name="search"
           htmlFor="search-input-id"
-          style={{ width: "100%" }}
+          className={styles.inputContainer}
         >
           <TextInput
             htmlFor="search-input-id"
             name="search"
             placeholder="Search..."
             ref={searchRef}
+          />
+
+          <Close
+            size="small"
+            className={styles.close}
+            onClick={handleClickClose}
           />
         </FormField>
       </Box>

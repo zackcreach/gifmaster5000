@@ -45,6 +45,7 @@ export default function PageWrapper({ Component, pageProps }) {
         <title>{title}</title>
         <meta name="title" content={title} />
         <meta name="description" content={description} />
+        <meta name="robots" content="noindex,nofollow" />
         <meta name="og:title" content={title} />
         <meta name="og:type" content="website" />
         <meta name="og:url" content="https://www.gifmaster5000.com" />
