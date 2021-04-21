@@ -17,7 +17,7 @@ import { StatusGood, Alert } from "grommet-icons";
 
 import GifTags from "./gifTags";
 
-const MODAL_CLOSE_DELAY = 400;
+const MODAL_CLOSE_DELAY = 250;
 
 export default function GifForm(props) {
   const title = props.item ? "Edit Gif" : "Upload Gif";
@@ -88,18 +88,36 @@ export default function GifForm(props) {
 
     try {
       const formData = new FormData();
-      formData.append("file", upload);
 
-      // Upload image
       let imageData = defaultValue.file;
       if (upload != null) {
-        const response = await fetch("/api/image/upload", {
+        // Get signed url for file upload
+        const signedResponse = await fetch("/api/image/signed", {
+          method: "POST",
+          body: JSON.stringify({ mimetype: upload.type }),
+        });
+        const signedData = await signedResponse.json();
+
+        // Add additional fields returned from signed response to formData for upload
+        Object.entries(signedData.fields).map(([key, value]) => {
+          formData.append(key, value);
+        });
+        formData.append("file", upload);
+
+        // Upload file, expect 204 (no content)
+        await fetch(signedData.url, {
           method: "POST",
           body: formData,
         });
 
-        const { data } = await response.json();
-        imageData = data;
+        // Assemble data for new db record
+        imageData = {
+          bucket: signedData.fields.bucket,
+          url: {
+            relative: signedData.fields.key,
+            absolute: `${signedData.url}/${signedData.fields.key}`,
+          },
+        };
       }
 
       // Post any new tags
@@ -162,15 +180,19 @@ export default function GifForm(props) {
   }
 
   function renderStatus() {
+    let status = null;
+
     if (isLoading) {
-      return <Spinner />;
-    } else if (!isLoading && isSubmitted && error.message == null) {
-      return <StatusGood color="brand" />;
-    } else if (!isLoading && isSubmitted && error.message != null) {
-      return <Alert color="status-error" />;
+      status = <Spinner />;
+    } else if (!isLoading && isSubmitted) {
+      if (error.message != null) {
+        status = <Alert color="status-error" />;
+      } else {
+        status = <StatusGood color="brand" />;
+      }
     }
 
-    return null;
+    return status;
   }
 
   return (
