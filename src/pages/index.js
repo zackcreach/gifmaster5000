@@ -7,6 +7,7 @@ import { getErrorMessage } from "../../utils/form";
 import GifForm from "../components/gifForm";
 import GifCard from "../components/gifCard";
 import GifSearch from "../components/gifSearch";
+import { formatSearchString } from "../../utils/helpers";
 
 export default function Home(props) {
   const [refreshGifs, refreshGifsResponse] = useLazyQuery(GifsQuery, {
@@ -147,7 +148,7 @@ const RemoveGifMutation = gql`
 `;
 
 export async function getServerSideProps(req) {
-  const search = req.query?.search || null;
+  const search = req.query?.search || "";
   const { query } = initializeApollo();
 
   const props = {
@@ -159,7 +160,7 @@ export async function getServerSideProps(req) {
   try {
     const gifsResponse = await query({
       query: GifsQuery,
-      variables: { search },
+      variables: { search: formatSearchString(search) },
     });
     props.gifs = gifsResponse?.data?.gifs || [];
 

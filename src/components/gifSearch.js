@@ -4,8 +4,11 @@ import { getErrorMessage } from "../../utils/form";
 import { Box, FormField, TextInput, Form } from "grommet";
 import { Close } from "grommet-icons";
 import { useDebouncedEffect } from "../hooks/useDebouncedEffect";
+import { formatSearchString } from "../../utils/helpers";
 
 import styles from "./gifSearch.module.css";
+
+const DEBOUNCE_TIME_MS = 100;
 
 export default function GifSearch(props) {
   const router = useRouter();
@@ -21,7 +24,7 @@ export default function GifSearch(props) {
     searchRef.current.focus();
   }, []);
 
-  useDebouncedEffect(handleValueUpdate, 500, [value]);
+  useDebouncedEffect(handleValueUpdate, DEBOUNCE_TIME_MS, [value]);
 
   function handleValueUpdate() {
     if (defaultValue.search === value.search) {
@@ -37,8 +40,7 @@ export default function GifSearch(props) {
 
   function searchGifs(value) {
     try {
-      // Modify search field to satisfy postgres' to_tsquery() syntax
-      const search = value.trim().replace(/\s/g, " | ");
+      const search = formatSearchString(value);
 
       props.refreshGifs({ variables: { search } });
     } catch (error) {
