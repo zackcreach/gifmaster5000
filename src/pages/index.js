@@ -1,7 +1,15 @@
 import { useState, useEffect } from "react";
 import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import { initializeApollo } from "../../apollo/client";
-import { Main, Layer, Text, Grid, Box } from "grommet";
+import {
+  Main,
+  Layer,
+  Text,
+  Grid,
+  Box,
+  InfiniteScroll,
+  ResponsiveContext,
+} from "grommet";
 import { getErrorMessage } from "../../utils/form";
 
 import GifForm from "../components/gifForm";
@@ -77,18 +85,30 @@ export default function Home(props) {
 
         {error.message && <Text color="status-error">{error.message}</Text>}
 
-        <Grid columns="small" gap="small">
-          {gifs.map((gif) => (
-            <GifCard
-              user={props.user}
-              key={gif.gif_name}
-              handleClickDelete={handleClickDelete}
-              setItem={setItem}
-              publicHost={props.globals.publicHost}
-              {...gif}
-            />
-          ))}
-        </Grid>
+        <ResponsiveContext.Consumer>
+          {(size) => (
+            <Grid columns="small" gap="small">
+              <InfiniteScroll
+                items={gifs}
+                step={size.includes("small") ? 8 : 32}
+                onMore={() => {
+                  // TODO: Query more gifs (eventually)
+                }}
+              >
+                {(gif) => (
+                  <GifCard
+                    user={props.user}
+                    key={gif.gif_name}
+                    handleClickDelete={handleClickDelete}
+                    setItem={setItem}
+                    publicHost={props.globals.publicHost}
+                    {...gif}
+                  />
+                )}
+              </InfiniteScroll>
+            </Grid>
+          )}
+        </ResponsiveContext.Consumer>
       </Box>
 
       {props.isUploadModalOpen && (

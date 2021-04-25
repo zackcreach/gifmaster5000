@@ -40,7 +40,7 @@ export default function PageWrapper({ Component, pageProps }) {
   }
 
   return (
-    <Grommet theme={theme} full background="dark-1">
+    <Grommet theme={theme} background="dark-1">
       <Head>
         <title>{title}</title>
         <meta name="title" content={title} />
